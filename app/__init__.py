@@ -73,7 +73,8 @@ def create_app():
         for m in machines:
             result.append({
                 "id": m.id,
-                "name": m.name
+                "name": m.name,
+                "status": m.status
             })
         return jsonify(result)
 
