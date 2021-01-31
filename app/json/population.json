@@ -1,0 +1,34 @@
+{
+    "areas": [
+        {"name": "A"},
+        {"name": "B"},
+        {"name": "C"}
+    ],
+    "sectors": [
+        {"name": "S1A", "area": "A"},
+        {"name": "S2A", "area": "A"},
+        {"name": "S1B", "area": "B"},
+        {"name": "S2B", "area": "B"},
+        {"name": "S3B", "area": "B"},
+        {"name": "S4B", "area": "B"},
+        {"name": "S1C", "area": "C"}
+
+    ],
+    "machines": [
+        {"name": "M1A.1", "sector": "S1A", "m_type": "", "description": ""},
+        {"name": "M1A.2", "sector": "S1A", "m_type": "", "description": ""},
+        {"name": "M2A.1", "sector": "S2A", "m_type": "", "description": ""},
+        {"name": "M1B.1", "sector": "S1B", "m_type": "", "description": ""},
+        {"name": "M2B.1", "sector": "S2B", "m_type": "", "description": ""},
+        {"name": "M2B.2", "sector": "S2B", "m_type": "", "description": ""},
+        {"name": "M3B.1", "sector": "S3B", "m_type": "", "description": ""},
+        {"name": "M4B.1", "sector": "S4B", "m_type": "", "description": ""},
+        {"name": "M1C.1", "sector": "S1C", "m_type": "", "description": ""},
+        {"name": "M1C.2", "sector": "S1C", "m_type": "", "description": ""},
+        {"name": "M1C.3", "sector": "S1C", "m_type": "", "description": ""},
+        {"name": "M1C.4", "sector": "S1C", "m_type": "", "description": ""},
+        {"name": "M3B.Z", "sector": "S3B", "m_type": "", "description": ""},
+        {"name": "M1A.Z", "sector": "S1A", "m_type": "", "description": ""}
+
+    ]
+}

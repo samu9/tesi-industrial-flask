@@ -1,0 +1,28 @@
+version: "3.3"
+
+services:
+        db:
+                container_name: db-industrial
+                image: mysql:5.7
+                volumes:
+                        - db_data:/var/lib/mysql
+                restart: always
+                environment:
+                        MYSQL_ROOT_PASSWORD: industrial
+                        MYSQL_DATABASE: industrial
+                        # MYSQL_USER: wordpress
+                        # MYSQL_PASSWORD: wordpress
+                ports: 
+                        - 3306:3306
+
+        phpmyadmin:
+                image: phpmyadmin
+                container_name: phpmyadmin-industrial
+                environment:
+                        - PMA_ARBITRARY=1
+                        - UPLOAD_LIMIT=15M
+                restart: always
+                ports:
+                        - 8080:80
+volumes:
+        db_data: {}
