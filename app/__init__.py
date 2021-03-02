@@ -1,7 +1,11 @@
+import random
+import datetime
+
 from flask import Flask, jsonify
 
 from app.database import db_session, Area, Sector, Machine, MachineData
 from app.constants import MACHINE_RUN, MACHINE_STOP, MACHINE_PAUSE
+from app.simulation import Simulation
 
 def create_app():
     app = Flask(__name__)
@@ -10,12 +14,23 @@ def create_app():
         AREA=1,
         SQLALCHEMY_DATABASE_URI="mysql+mysqldb://root:@localhost[:3306]/industrial"
         )
-    
 
+    AREA_ID = 1
+    SECTOR_ID = 1    
+
+    sim = Simulation(SECTOR_ID)
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         db_session.remove()
+
+
+    @app.route('/position', methods=['GET'])
+    def get_position():
+        return jsonify({
+            "area_id": AREA_ID,
+            "sector_id": SECTOR_ID
+        })
 
     @app.route('/area')
     def get_areas():
@@ -74,10 +89,29 @@ def create_app():
             result.append({
                 "id": m.id,
                 "name": m.name,
-                "status": m.status
+                "status": m.status,
+                "temp_threshold": 60,
+                "speed_threshold": 3500,
+                "efficiency_threshold": 60
             })
         return jsonify(result)
 
+
+    @app.route("/machine/<id>/<command>", methods=['POST'])
+    def command_machine(id, comment):
+        machine = Machine.query.get(id)
+
+        if not machine:
+            raise Exception("macchina non esistente")
+        
+        if command == MACHINE_RUN:
+            machine.started = True
+
+        machine.status = command
+
+        db_session.commit()
+
+        return True
 
     @app.route("/machine/<id>/start", methods=["POST"])
     def start_machine(id):
@@ -107,7 +141,7 @@ def create_app():
 
     @app.route("/machine/<id>/data", methods=['GET'])
     def get_machine_data(id):
-        data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).all()
+        data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).limit(10).all()
 
         result = []
 
@@ -120,6 +154,15 @@ def create_app():
 
         return jsonify(result)
 
+    @app.route("/machine/<id>/data/update", methods=['GET'])
+    def get_update_data(id):
+        
+        return jsonify({
+            "machine_id": id,
+            "values":sim.generate(id),
+            "timestamp": datetime.datetime.now().isoformat(sep=" ")
+        })
+
     @app.route("/machine/<id>/data/last", methods=['GET'])
     def get_last_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).first()
@@ -130,5 +173,10 @@ def create_app():
             "values": [data.value1, data.value2, data.value3],
             "timestamp": data.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         })
+
+    @app.route("/machine/<id>/danger", methods=['POST'])
+    def set_in_danger(id):
+        sim.set_danger_mode(id)
+        return jsonify(True)
 
     return app
