@@ -3,8 +3,8 @@ import random
 import datetime
 import time
 
-from app.database import db_session, Machine, MachineData
-from app.constants import SIM_SLEEP_TIME
+from industrial.database import db_session, Machine, MachineData
+from industrial.constants import SIM_SLEEP_TIME
 
 DELAY = float(1)
 

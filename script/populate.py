@@ -1,13 +1,13 @@
 import os
 import json
 
-from app.database import *
+from industrial.database import *
 
 def populate():
     abs_path = os.path.abspath(__file__)
     folder = os.path.dirname(os.path.dirname(abs_path))
     print(folder)
-    with open(f"{folder}/app/json/population.json") as fp:
+    with open(f"{folder}/industrial/json/population.json") as fp:
         population = json.load(fp)
 
     for area in population['areas']:

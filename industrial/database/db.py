@@ -12,5 +12,5 @@ Base.query = db_session.query_property()
 
 # db = SQLAlchemy()
 def init_db():
-    import app.database.models
+    import industrial.database.models
     Base.metadata.create_all(bind=engine)

@@ -3,8 +3,8 @@ import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
-from app.database.db import Base
-from app.constants import MACHINE_STOP
+from industrial.database.db import Base
+from industrial.constants import MACHINE_STOP
 
 class Area(Base):
     __tablename__ = "area"
