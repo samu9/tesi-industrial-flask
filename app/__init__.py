@@ -1,11 +1,15 @@
 import random
 import datetime
+import logging
 
 from flask import Flask, jsonify
 
 from app.database import db_session, Area, Sector, Machine, MachineData
 from app.constants import MACHINE_RUN, MACHINE_STOP, MACHINE_PAUSE
 from app.simulation import Simulation
+
+
+logging.basicConfig(filename="app.log", format='%(asctime)s - %(message)s', level=logging.INFO)
 
 def create_app():
     app = Flask(__name__)
