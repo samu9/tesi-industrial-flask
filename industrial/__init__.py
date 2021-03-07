@@ -9,8 +9,6 @@ from industrial.constants import MACHINE_RUN, MACHINE_STOP, MACHINE_PAUSE
 from industrial.simulation import Simulation
 
 
-logging.basicConfig(filename="app.log", format='%(asctime)s - %(message)s', level=logging.INFO)
-
 def create_app():
     app = Flask(__name__)
     # industrial.config.from_envvar("AREA")
