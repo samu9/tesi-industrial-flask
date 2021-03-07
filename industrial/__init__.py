@@ -11,7 +11,7 @@ from industrial.simulation import Simulation
 
 logging.basicConfig(filename="industrial.log", format='%(asctime)s - %(message)s', level=logging.INFO)
 
-def create_industrial():
+def create_app():
     industrial = Flask(__name__)
     # industrial.config.from_envvar("AREA")
     industrial.config.from_mapping(
