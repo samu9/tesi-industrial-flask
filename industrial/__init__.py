@@ -9,7 +9,7 @@ from industrial.constants import MACHINE_RUN, MACHINE_STOP, MACHINE_PAUSE
 from industrial.simulation import Simulation
 
 
-logging.basicConfig(filename="industrial.log", format='%(asctime)s - %(message)s', level=logging.INFO)
+logging.basicConfig(filename="app.log", format='%(asctime)s - %(message)s', level=logging.INFO)
 
 def create_app():
     app = Flask(__name__)
@@ -41,7 +41,7 @@ def create_app():
         areas = Area.query.all()
         result = []
         for a in areas:
-            result.industrialend({
+            result.append({
                 "id": a.id,
                 "name": a.name
             })
@@ -65,7 +65,7 @@ def create_app():
             else query.filter(Sector.area_id==area_id).all()
         result = []
         for s in sectors:
-            result.industrialend({
+            result.append({
                 "id": s.id,
                 "name": s.name
             })
@@ -90,7 +90,7 @@ def create_app():
             else query.filter(Machine.sector_id==sector_id).all()
         result = []
         for m in machines:
-            result.industrialend({
+            result.append({
                 "id": m.id,
                 "name": m.name,
                 "status": m.status,
@@ -150,7 +150,7 @@ def create_app():
         result = []
 
         for d in data:
-            result.industrialend({
+            result.append({
                 "machine_id": d.machine_id,
                 "values": [d.value1, d.value2, d.value3],
                 "timestamp": d.timestamp.strftime("%Y-%m-%d %H:%M:%S")
