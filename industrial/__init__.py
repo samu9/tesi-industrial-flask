@@ -12,9 +12,9 @@ from industrial.simulation import Simulation
 logging.basicConfig(filename="industrial.log", format='%(asctime)s - %(message)s', level=logging.INFO)
 
 def create_app():
-    industrial = Flask(__name__)
+    app = Flask(__name__)
     # industrial.config.from_envvar("AREA")
-    industrial.config.from_mapping(
+    app.config.from_mapping(
         AREA=1,
         SQLALCHEMY_DATABASE_URI="mysql+mysqldb://root:@localhost[:3306]/industrial"
         )
@@ -24,19 +24,19 @@ def create_app():
 
     sim = Simulation(SECTOR_ID)
 
-    @industrial.teardown_appcontext
+    @app.teardown_appcontext
     def shutdown_session(exception=None):
         db_session.remove()
 
 
-    @industrial.route('/position', methods=['GET'])
+    @app.route('/position', methods=['GET'])
     def get_position():
         return jsonify({
             "area_id": AREA_ID,
             "sector_id": SECTOR_ID
         })
 
-    @industrial.route('/area')
+    @app.route('/area')
     def get_areas():
         areas = Area.query.all()
         result = []
@@ -47,7 +47,7 @@ def create_app():
             })
         return jsonify(result)
     
-    @industrial.route('/area/<id>')
+    @app.route('/area/<id>')
     def get_area_data(id):
         area = Area.query.filter(Area.id == id).first()
         result = {
@@ -57,8 +57,8 @@ def create_app():
         }
         return jsonify(result)
 
-    @industrial.route('/area/<area_id>/sectors')
-    @industrial.route('/sector')
+    @app.route('/area/<area_id>/sectors')
+    @app.route('/sector')
     def get_sectors(area_id=None):
         query = Sector.query
         sectors = query.all() if area_id is None \
@@ -71,7 +71,7 @@ def create_app():
             })
         return jsonify(result)
 
-    @industrial.route('/sector/<id>')
+    @app.route('/sector/<id>')
     def get_sector_data(id):
         sector = Sector.query.filter(Sector.id == id).first()
         result = {
@@ -81,8 +81,8 @@ def create_app():
         }
         return jsonify(result)
 
-    @industrial.route('/sector/<sector_id>/machines')
-    @industrial.route('/machine')
+    @app.route('/sector/<sector_id>/machines')
+    @app.route('/machine')
     def get_machines(sector_id=None):
         query = Machine.query
 
@@ -101,7 +101,7 @@ def create_app():
         return jsonify(result)
 
 
-    @industrial.route("/machine/<id>/<command>", methods=['POST'])
+    @app.route("/machine/<id>/<command>", methods=['POST'])
     def command_machine(id, comment):
         machine = Machine.query.get(id)
 
@@ -117,7 +117,7 @@ def create_app():
 
         return True
 
-    @industrial.route("/machine/<id>/start", methods=["POST"])
+    @app.route("/machine/<id>/start", methods=["POST"])
     def start_machine(id):
         machine = Machine.query.filter(Machine.id==id).first()
 
@@ -131,7 +131,7 @@ def create_app():
 
         return jsonify(True)
 
-    @industrial.route("/machine/<id>/stop", methods=["POST"])
+    @app.route("/machine/<id>/stop", methods=["POST"])
     def stop_machine(id):
         machine = Machine.query.filter(Machine.id==id).first()
 
@@ -143,7 +143,7 @@ def create_app():
         return jsonify(True)
 
 
-    @industrial.route("/machine/<id>/data", methods=['GET'])
+    @app.route("/machine/<id>/data", methods=['GET'])
     def get_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).limit(10).all()
 
@@ -158,7 +158,7 @@ def create_app():
 
         return jsonify(result)
 
-    @industrial.route("/machine/<id>/data/update", methods=['GET'])
+    @app.route("/machine/<id>/data/update", methods=['GET'])
     def get_update_data(id):
         
         return jsonify({
@@ -167,7 +167,7 @@ def create_app():
             "timestamp": datetime.datetime.now().isoformat(sep=" ")
         })
 
-    @industrial.route("/machine/<id>/data/last", methods=['GET'])
+    @app.route("/machine/<id>/data/last", methods=['GET'])
     def get_last_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).first()
         if not data:
@@ -178,9 +178,11 @@ def create_app():
             "timestamp": data.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         })
 
-    @industrial.route("/machine/<id>/danger", methods=['POST'])
+    @app.route("/machine/<id>/danger", methods=['POST'])
     def set_in_danger(id):
         sim.set_danger_mode(id)
         return jsonify(True)
 
-    return industrial
+    return app
+
+app = create_app()
