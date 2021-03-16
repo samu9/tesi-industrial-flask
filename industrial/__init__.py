@@ -4,14 +4,14 @@ import logging
 
 from flask import Flask, jsonify
 
-from industrial.database import db_session, Area, Sector, Machine, MachineData
-from industrial.constants import MACHINE_RUN, MACHINE_STOP, MACHINE_PAUSE
+from industrial.database import db_session, Area, Sector, Machine, MachineData, User, MachineLog
+from industrial.constants import MACHINE_START, MACHINE_STOP, MACHINE_PAUSE
 from industrial.simulation import Simulation
 
 
 def create_app():
     app = Flask(__name__)
-    # industrial.config.from_envvar("AREA")
+    # app.config.from_envvar("AREA")
     app.config.from_mapping(
         AREA=1,
         SQLALCHEMY_DATABASE_URI="mysql+mysqldb://root:@localhost[:3306]/industrial"
@@ -21,6 +21,7 @@ def create_app():
     SECTOR_ID = 1    
 
     sim = Simulation(SECTOR_ID)
+
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -34,6 +35,7 @@ def create_app():
             "sector_id": SECTOR_ID
         })
 
+
     @app.route('/area')
     def get_areas():
         areas = Area.query.all()
@@ -45,6 +47,7 @@ def create_app():
             })
         return jsonify(result)
     
+
     @app.route('/area/<id>')
     def get_area_data(id):
         area = Area.query.filter(Area.id == id).first()
@@ -54,6 +57,7 @@ def create_app():
             "sectors": len(area.sectors)
         }
         return jsonify(result)
+
 
     @app.route('/area/<area_id>/sectors')
     @app.route('/sector')
@@ -69,6 +73,7 @@ def create_app():
             })
         return jsonify(result)
 
+
     @app.route('/sector/<id>')
     def get_sector_data(id):
         sector = Sector.query.filter(Sector.id == id).first()
@@ -78,6 +83,7 @@ def create_app():
             "machines": len(sector.machines)
         }
         return jsonify(result)
+
 
     @app.route('/sector/<sector_id>/machines')
     @app.route('/machine')
@@ -94,56 +100,28 @@ def create_app():
                 "status": m.status,
                 "temp_threshold": 60,
                 "speed_threshold": 3500,
-                "efficiency_threshold": 60
+                "efficiency_threshold": 60,
+                "value_in_danger": None
             })
         return jsonify(result)
 
 
-    @app.route("/machine/<id>/<command>", methods=['POST'])
-    def command_machine(id, comment):
-        machine = Machine.query.get(id)
+    @app.route("/machine/<id>/danger", methods=['POST'])
+    def set_in_danger(id):
+        sim.set_danger_mode(id)
+        return jsonify({"result": True})
 
-        if not machine:
-            raise Exception("macchina non esistente")
-        
-        if command == MACHINE_RUN:
-            machine.started = True
 
-        machine.status = command
-
-        db_session.commit()
-
-        return True
-
-    @app.route("/machine/<id>/start", methods=["POST"])
-    def start_machine(id):
-        machine = Machine.query.filter(Machine.id==id).first()
-
-        if not machine:
-            raise Exception
-
-        machine.started = True
-        machine.status = MACHINE_RUN
-
-        db_session.commit()
-
-        return jsonify(True)
-
-    @app.route("/machine/<id>/stop", methods=["POST"])
-    def stop_machine(id):
-        machine = Machine.query.filter(Machine.id==id).first()
-
-        machine.started = False
-        machine.status = MACHINE_STOP
-
-        db_session.commit()
-        
-        return jsonify(True)
+    @app.route("/machine/<id>/resolve", methods=['POST'])
+    def resolve_danger(id):
+        sim.set_danger_mode(id)
+        return jsonify({"result": True})
 
 
     @app.route("/machine/<id>/data", methods=['GET'])
     def get_machine_data(id):
-        data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).limit(10).all()
+        data = MachineData.query.filter(MachineData.machine_id==id)\
+            .order_by(MachineData.timestamp.desc()).limit(10).all()
 
         result = []
 
@@ -156,6 +134,7 @@ def create_app():
 
         return jsonify(result)
 
+
     @app.route("/machine/<id>/data/update", methods=['GET'])
     def get_update_data(id):
         
@@ -165,21 +144,64 @@ def create_app():
             "timestamp": datetime.datetime.now().isoformat(sep=" ")
         })
 
+
     @app.route("/machine/<id>/data/last", methods=['GET'])
     def get_last_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).first()
         if not data:
-            return jsonify({})
+            return jsonify({"result": True})
         return jsonify({
             "machine_id": data.machine_id,
             "values": [data.value1, data.value2, data.value3],
             "timestamp": data.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         })
 
-    @app.route("/machine/<id>/danger", methods=['POST'])
-    def set_in_danger(id):
-        sim.set_danger_mode(id)
+
+    @app.route("/machine/<id>/<command>", methods=['POST'])
+    def command_machine(id, command):
+        machine = Machine.query.get(id)
+
+        if not machine:
+            raise Exception("macchina non esistente")
+        
+        if command == MACHINE_START:
+            machine.started = True
+        
+        machine_log = MachineLog(machine_id = id, action=command, user_id=1, timestamp=datetime.datetime.now())
+        db_session.add(machine_log)
+        machine.status = command
+
+        db_session.commit()
+
+        return jsonify({"result": True})
+
+
+    @app.route("/machine/<id>/start", methods=["POST"])
+    def start_machine(id):
+        machine = Machine.query.filter(Machine.id==id).first()
+
+        if not machine:
+            raise Exception
+
+        machine.started = True
+        machine.status = MACHINE_START
+
+        db_session.commit()
+
         return jsonify(True)
+
+
+    @app.route("/machine/<id>/stop", methods=["POST"])
+    def stop_machine(id):
+        machine = Machine.query.filter(Machine.id==id).first()
+
+        machine.started = False
+        machine.status = MACHINE_STOP
+
+        db_session.commit()
+        
+        return jsonify({"result": True})
+
 
     return app
 
