@@ -22,6 +22,9 @@ def create_app():
 
     sim = Simulation(SECTOR_ID)
 
+    @app.before_request
+    def simulation_status():
+        print(sim.machines)
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -137,10 +140,10 @@ def create_app():
 
     @app.route("/machine/<id>/data/update", methods=['GET'])
     def get_update_data(id):
-        
+        values = sim.generate(id)
         return jsonify({
             "machine_id": id,
-            "values":sim.generate(id),
+            "values": values,
             "timestamp": datetime.datetime.now().isoformat(sep=" ")
         })
 
