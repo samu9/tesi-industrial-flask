@@ -15,14 +15,14 @@ services:
                 ports: 
                         - 3306:3306
 
-        phpmyadmin:
-                image: phpmyadmin
-                container_name: phpmyadmin-industrial
-                environment:
-                        - PMA_ARBITRARY=1
-                        - UPLOAD_LIMIT=15M
-                restart: always
-                ports:
-                        - 8080:80
+        # phpmyadmin:
+        #         image: phpmyadmin
+        #         container_name: phpmyadmin-industrial
+        #         environment:
+        #                 - PMA_ARBITRARY=1
+        #                 - UPLOAD_LIMIT=15M
+        #         restart: always
+        #         ports:
+        #                 - 8080:80
 volumes:
         db_data: {}
