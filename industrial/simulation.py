@@ -58,8 +58,8 @@ class Simulation:
 
     def set_danger_mode(self, machine_id):
         if int(machine_id) not in self.machines:
-
             return False
+            
         self.danger_mode = True
         self.machines[int(machine_id)]["in_danger"] = True
         self.machines[int(machine_id)]["value_in_danger"] = random.randint(1,3)
