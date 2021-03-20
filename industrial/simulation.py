@@ -66,6 +66,12 @@ class Simulation:
         print(self.machines)
         return True
 
+    def resolve_danger_mode(self, machine_id):
+        self.danger_mode = False
+        self.machines[int(machine_id)]["in_danger"] = True
+        self.machines[int(machine_id)]["value_in_danger"] = None
+
+        return True
 
     def generate_and_store(self, machine):
         values = self.generate()
