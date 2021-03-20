@@ -1,2 +1,2 @@
-from .db import db_session, init_db
+from .db import db_session
 from .models import *
