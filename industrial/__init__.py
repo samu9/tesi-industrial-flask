@@ -6,7 +6,7 @@ from flask import Flask, jsonify
 
 from industrial.database import db_session, Area, Sector, Machine, MachineData, User, MachineLog
 
-from industrial.constants import MACHINE_START, MACHINE_STOP, MACHINE_PAUSE, MACHINE_RESUME
+from industrial.constants import MACHINE_START, MACHINE_STOP, MACHINE_PAUSE, MACHINE_RESUME, RESOLVE_STEPS
 from industrial.simulation import Simulation
 
 
@@ -172,6 +172,9 @@ def create_app():
             machine.started = True
         if command == MACHINE_RESUME:
             command = MACHINE_START
+        if command == 'resolve':
+            sim.resolve_danger_mode(id)
+            return jsonify({"result": True})
 
         machine_log = MachineLog(machine_id = id, action=command, user_id=1, timestamp=datetime.datetime.now())
         db_session.add(machine_log)
