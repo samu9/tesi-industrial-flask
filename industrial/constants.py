@@ -17,18 +17,18 @@ POS_TEMP = 2
 
 RESOLVE_STEPS = [
     {
-        "Check the values."
+        "message": "Check the values."
     },
     {
-        "Tune the power know accordingly."
+        "message": "Tune the power knob accordingly."
     },
     {
-        "Pause the machine."
+        "message": "Press the first button."
     },
     {
-        "Stop the machine."
+        "message": "Press the second button."
     },
     {
-        "HALT the machine."
+        "message": "HALT the machine."
     }
 ]
