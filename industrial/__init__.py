@@ -5,7 +5,7 @@ import logging
 from flask import Flask, jsonify
 
 from industrial.database import db_session, Area, Sector, Machine, MachineData, User, MachineLog
-from industrial.constants import MACHINE_START, MACHINE_STOP, MACHINE_PAUSE
+from industrial.constants import MACHINE_START, MACHINE_STOP, MACHINE_PAUSE, RESOLVE_STEPS
 from industrial.simulation import Simulation
 
 
@@ -115,9 +115,9 @@ def create_app():
         return jsonify({"result": True})
 
 
-    @app.route("/machine/<id>/resolve", methods=['POST'])
+    @app.route("/machine/<id>/resolve", methods=['GET'])
     def resolve_danger(id):
-        sim.set_danger_mode(id)
+        sim.resolve_danger_mode(id)
         return jsonify({"result": True})
 
 
