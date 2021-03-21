@@ -161,7 +161,21 @@ def create_app():
         })
 
 
-    @app.route("/machine/<id>/<command>", methods=['POST'])
+    @app.route("/machine/<id>/log", methods=['GET'])
+    def get_machine_logs(id):
+        logs = MachineLog.query.filter(MachineLog.machine_id == id).order_by(MachineLog.timestamp.desc()).all()
+
+        result = []
+
+        for l in logs:
+            result.append({
+                "user": l.user.name,
+                "action": l.action,
+                "timestamp": l.timestamp.strftime("%d/%m/%Y %H:%M:%S")
+            })
+        return jsonify(result)
+
+    @app.route("/machine/<id>/command/<command>", methods=['POST'])
     def command_machine(id, command):
         machine = Machine.query.get(id)
 
