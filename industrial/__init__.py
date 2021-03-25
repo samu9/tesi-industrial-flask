@@ -23,9 +23,9 @@ def create_app():
 
     sim = Simulation(SECTOR_ID)
 
-    @app.before_request
-    def simulation_status():
-        print(sim.machines)
+    # @app.before_request
+    # def simulation_status():
+    #     print(sim.machines)
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -113,13 +113,19 @@ def create_app():
     @app.route("/machine/<id>/danger", methods=['POST'])
     def set_in_danger(id):
         sim.set_danger_mode(id)
-        return jsonify({"result": True})
+        return jsonify({"message": "Danger set", "result": True})
+
+
+    @app.route("/machine/<id>/danger/instruction", methods=['GET'])
+    def get_danger_instructions(id):
+        message = sim.get_danger_instruction_message(id)
+        return jsonify({"message": message, "result": True})
 
 
     @app.route("/machine/<id>/resolve", methods=['GET'])
     def resolve_danger(id):
         sim.resolve_danger_mode(id)
-        return jsonify({"result": True})
+        return jsonify({"message": "Danger resolved", "result": True})
 
 
     @app.route("/machine/<id>/data", methods=['GET'])
@@ -196,7 +202,7 @@ def create_app():
 
         db_session.commit()
 
-        return jsonify({"result": True})
+        return jsonify({"message": "Command sent", "result": True})
 
 
     @app.route("/machine/<id>/start", methods=["POST"])
@@ -223,7 +229,7 @@ def create_app():
 
         db_session.commit()
         
-        return jsonify({"result": True})
+        return jsonify({"message": "Machine stopped", "result": True})
 
 
     return app
