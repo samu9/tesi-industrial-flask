@@ -17,19 +17,8 @@ POS_TEMP = 2
 # VALUES
 
 RESOLVE_STEPS = [
-    {
-        "message": "Check the values."
-    },
-    {
-        "message": "Tune the power knob accordingly."
-    },
-    {
-        "message": "Press the first button."
-    },
-    {
-        "message": "Press the second button."
-    },
-    {
-        "message": "HALT the machine."
-    }
+    "Check the values.",
+    "Tune the power knob accordingly.",
+    "Press the pressure button.",
+    "Press the 'Release steam' button.",
 ]
