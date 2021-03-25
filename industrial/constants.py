@@ -19,6 +19,6 @@ POS_TEMP = 2
 RESOLVE_STEPS = [
     "Check the values.",
     "Tune the power knob accordingly.",
-    "Press the pressure button.",
+    "Press the 'pressure' button.",
     "Press the 'Release steam' button.",
 ]
