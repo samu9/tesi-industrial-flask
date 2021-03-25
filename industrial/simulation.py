@@ -4,7 +4,7 @@ import datetime
 import time
 
 from industrial.database import db_session, Machine, MachineData
-from industrial.constants import SIM_SLEEP_TIME
+from industrial.constants import SIM_SLEEP_TIME, RESOLVE_STEPS
 
 DELAY = float(1)
 
@@ -22,7 +22,8 @@ class Simulation:
             self.machines[m.id] = {
                 "in_danger": False,
                 "last_data": [],
-                "value_in_danger": 0
+                "value_in_danger": 0,
+                "current_danger_message": 0
             }
         db_session.commit()
         print(self.machines)
@@ -65,6 +66,17 @@ class Simulation:
         self.machines[int(machine_id)]["value_in_danger"] = random.randint(1,3)
         print(self.machines)
         return True
+
+    def get_danger_instruction_message(self, machine_id):
+        if self.machines[int(machine_id)]["current_danger_message"] == len(RESOLVE_STEPS):
+            self.machines[int(machine_id)]["current_danger_message"] = 0
+            self.resolve_danger_mode(machine_id)
+            return "All procedures completed."
+
+        message = RESOLVE_STEPS[self.machines[int(machine_id)]["current_danger_message"]]
+        self.machines[int(machine_id)]["current_danger_message"] += 1
+
+        return message
 
     def resolve_danger_mode(self, machine_id):
         self.danger_mode = False
