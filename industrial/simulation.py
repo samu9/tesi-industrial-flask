@@ -68,15 +68,26 @@ class Simulation:
         return True
 
     def get_danger_instruction_message(self, machine_id):
-        if self.machines[int(machine_id)]["current_danger_message"] == len(RESOLVE_STEPS):
+        message = None
+        user_id = None
+
+        if not self.machines[int(machine_id)]["in_danger"]:
+            message = ""
+        elif self.machines[int(machine_id)]["current_danger_message"] == len(RESOLVE_STEPS):
             self.machines[int(machine_id)]["current_danger_message"] = 0
             self.resolve_danger_mode(machine_id)
-            return "All procedures completed."
+            message = "All procedures completed."
+        else:
+            message = RESOLVE_STEPS[self.machines[int(machine_id)]["current_danger_message"]]
 
-        message = RESOLVE_STEPS[self.machines[int(machine_id)]["current_danger_message"]]
-        self.machines[int(machine_id)]["current_danger_message"] += 1
+            if self.machines[int(machine_id)]["current_danger_message"] == 1:
+                user_id = 3
+            if self.machines[int(machine_id)]["current_danger_message"] == 3:
+                user_id = 2
 
-        return message
+            self.machines[int(machine_id)]["current_danger_message"] += 1
+
+        return message, user_id
 
     def resolve_danger_mode(self, machine_id):
         self.danger_mode = False
