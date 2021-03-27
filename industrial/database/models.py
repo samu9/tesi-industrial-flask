@@ -18,6 +18,19 @@ class User(Base):
     log = relationship("MachineLog", back_populates="user")
     instruction = relationship("Instruction", back_populates="user")
 
+
+class Instruction(Base):
+    __tablename__ = "instruction"
+
+    id = Column(Integer, primary_key=True)
+    sequence = Column(Integer)
+    param = Column(Integer)
+    message = Column(String(300), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="instruction")
+
+
+
 class Area(Base):
     __tablename__ = "area"
 
