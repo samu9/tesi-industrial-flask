@@ -2,7 +2,7 @@ import random
 import datetime
 import logging
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 
 from industrial.database import db_session, Area, Sector, Machine, MachineData, User, MachineLog
 
@@ -11,11 +11,12 @@ from industrial.simulation import Simulation
 
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__ , static_url_path='/static')
     # app.config.from_envvar("AREA")
     app.config.from_mapping(
         AREA=1,
-        SQLALCHEMY_DATABASE_URI="mysql+mysqldb://root:@localhost[:3306]/industrial"
+        SQLALCHEMY_DATABASE_URI="mysql+mysqldb://root:@localhost[:3306]/industrial",
+        USER_IMG_DIR="static"
         )
 
     AREA_ID = 1
@@ -30,6 +31,11 @@ def create_app():
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         db_session.remove()
+
+
+    @app.route('/user/<id>/img', methods=['GET'])
+    def get_user_image(id):
+        return send_from_directory(app.config['USER_IMG_DIR'], id + '.jpg')
 
 
     @app.route('/position', methods=['GET'])
