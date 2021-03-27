@@ -124,8 +124,24 @@ def create_app():
 
     @app.route("/machine/<id>/danger/instruction", methods=['GET'])
     def get_danger_instructions(id):
-        message = sim.get_danger_instruction_message(id)
-        return jsonify({"message": message, "result": True})
+        message, user_id = sim.get_danger_instruction_message(id)
+
+        result = {
+            "message": message
+        }
+
+        if user_id is not None:
+            assistant = User.query.filter(User.id == user_id).first()
+
+            if assistant is not None:
+                result['assistant'] = {
+                    "name": assistant.name,
+                    "role": assistant.role,
+                    "phone": assistant.phone,
+                    "img_url": f"/user/{assistant.id}/img"
+                }
+
+        return jsonify(result)
 
 
     @app.route("/machine/<id>/resolve", methods=['GET'])
