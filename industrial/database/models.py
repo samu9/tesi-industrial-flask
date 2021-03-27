@@ -6,12 +6,17 @@ from sqlalchemy.orm import relationship
 from industrial.database.db import Base
 from industrial.constants import MACHINE_STOP
 
+
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True, nullable=False)
+    role = Column(String(100))
+    phone = Column(String(30))
+    img_url = Column(String(300))
     log = relationship("MachineLog", back_populates="user")
+    instruction = relationship("Instruction", back_populates="user")
 
 class Area(Base):
     __tablename__ = "area"
