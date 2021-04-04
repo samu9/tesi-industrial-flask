@@ -1,10 +1,14 @@
+import os
 import random
 import datetime
 import logging
+import uuid
+import base64
 
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
+from werkzeug.utils import secure_filename
 
-from industrial.database import db_session, Area, Sector, Machine, MachineData, User, MachineLog
+from industrial.database import db_session, Area, Sector, Machine, MachineData, User, MachineLog, MachineImage
 
 from industrial.constants import MACHINE_START, MACHINE_STOP, MACHINE_PAUSE, MACHINE_RESUME, RESOLVE_STEPS
 from industrial.simulation import Simulation
@@ -15,12 +19,6 @@ def create_app():
 
     log = logging.getLogger(__name__)
     app = Flask(__name__ , static_url_path='/static')
-    # app.config.from_envvar("AREA")
-    app.config.from_mapping(
-        AREA=1,
-        SQLALCHEMY_DATABASE_URI="mysql+mysqldb://root:@localhost[:3306]/industrial",
-        USER_IMG_DIR="static"
-        )
 
     try:
         app.config.from_envvar('INDUSTRIAL_CONFIG')
@@ -271,9 +269,45 @@ def create_app():
 
         db_session.commit()
         
-        return jsonify({"message": "Machine stopped", "result": True})
+        return jsonify(api_response("Machine stopped"))
+
+
+    @app.route("/machine/<id>/image", methods=['GET'])
+    def get_image_list(id):
+        images = db_session.query(MachineImage.image_uuid).filter(MachineImage.machine_id==id).all()
+        images_list = [i[0] for i in images]
+        return jsonify(images_list)
+
+
+    @app.route("/machine/<id>/image", methods=['POST'])
+    def post_image(id):
+        image_uuid = str(uuid.uuid4())
+        filename = image_uuid + "." + app.config['IMAGE_FORMAT']
+        try:
+            log.info("saving image")
+            with open(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER'], filename), "wb") as f:
+                image_data = base64.b64decode(request.data.decode("utf-8"))
+                f.write(image_data)
+
+        except Exception as e:
+            log.exception(e)
+            return jsonify(api_response("Failed to decode data", result=False))
+        
+        machine_image = MachineImage(image_uuid=image_uuid, machine_id=id, timestamp=datetime.datetime.now())
+        db_session.add(machine_image)
+        db_session.commit()
+
+        return jsonify(api_response("Upload successful"))
+
+
+    @app.route("/machine/image/<image_id>", methods=['GET'])
+    def serve_machine_img(image_id):
+        print("ok")
+        return send_from_directory(app.config['USER_IMG_DIR'] + "/uploads", image_id + '.jpg')
 
 
     return app
+
+
 
 app = create_app()
