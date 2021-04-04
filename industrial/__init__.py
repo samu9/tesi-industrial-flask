@@ -38,6 +38,16 @@ def create_app():
             "result": result
         }
 
+
+    @app.before_request
+    def check_auth():
+        auth = request.headers.get("Authorization")
+        if auth != "Basic " + app.config['API_KEY']:
+            log.error("Unauthorized")
+            log.error(auth)
+            return jsonify(api_response("Unauthorized", result=False)), 401
+
+
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         db_session.remove()
