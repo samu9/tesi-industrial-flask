@@ -58,8 +58,9 @@ class Machine(Base):
     description = Column(Text)
     sector_id = Column(Integer, ForeignKey("sector.id"), nullable=False)
     sector = relationship("Sector", back_populates="machines")
-    data = relationship("MachineData", back_populates="machine")
-    log = relationship("MachineLog", back_populates="machine")
+    data = relationship("MachineData", uselist = True, back_populates="machine")
+    log = relationship("MachineLog", uselist = True, back_populates="machine")
+    image = relationship("MachineImage", uselist = True, back_populates="machine")
     started = Column(Boolean, default=False, nullable=False)
     status = Column(String(5), default=MACHINE_STOP, nullable=False)
 
@@ -84,3 +85,12 @@ class MachineLog(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="log")
     timestamp = Column(DateTime, nullable=False)
+
+class MachineImage(Base):
+    __tablename__ = "machineImage"
+
+    id = Column(Integer, primary_key=True)
+    image_uuid = Column(String(36))
+    machine_id = Column(Integer, ForeignKey("machine.id"), nullable=False)
+    machine = relationship("Machine", back_populates="image")
+    timestamp = Column(DateTime)
