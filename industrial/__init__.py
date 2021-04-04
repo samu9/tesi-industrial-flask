@@ -9,8 +9,11 @@ from industrial.database import db_session, Area, Sector, Machine, MachineData, 
 from industrial.constants import MACHINE_START, MACHINE_STOP, MACHINE_PAUSE, MACHINE_RESUME, RESOLVE_STEPS
 from industrial.simulation import Simulation
 
+logging.basicConfig(format='%(asctime)s %(message)s', filename='industrial.log', level=logging.INFO)
 
 def create_app():
+
+    log = logging.getLogger(__name__)
     app = Flask(__name__ , static_url_path='/static')
     # app.config.from_envvar("AREA")
     app.config.from_mapping(
