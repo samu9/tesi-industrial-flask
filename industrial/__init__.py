@@ -31,9 +31,12 @@ def create_app():
 
     sim = Simulation(app.config['SECTOR_ID'])
 
-    # @app.before_request
-    # def simulation_status():
-    #     print(sim.machines)
+
+    def api_response(message, result=True):
+        return {
+            "message": message,
+            "result": result
+        }
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -126,7 +129,7 @@ def create_app():
     @app.route("/machine/<id>/danger", methods=['POST'])
     def set_in_danger(id):
         sim.set_danger_mode(id)
-        return jsonify({"message": "Danger set", "result": True})
+        return jsonify(api_response("Danger set"))
 
 
     @app.route("/machine/<id>/danger/instruction", methods=['GET'])
@@ -154,7 +157,7 @@ def create_app():
     @app.route("/machine/<id>/resolve", methods=['GET'])
     def resolve_danger(id):
         sim.resolve_danger_mode(id)
-        return jsonify({"message": "Danger resolved", "result": True})
+        return jsonify(api_response("Danger resolved"))
 
 
     @app.route("/machine/<id>/data", methods=['GET'])
@@ -231,7 +234,7 @@ def create_app():
 
         db_session.commit()
 
-        return jsonify({"message": "Command sent", "result": True})
+        return jsonify(api_response("Command sent"))
 
 
     @app.route("/machine/<id>/start", methods=["POST"])
