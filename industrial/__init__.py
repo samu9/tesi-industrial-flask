@@ -22,10 +22,14 @@ def create_app():
         USER_IMG_DIR="static"
         )
 
-    AREA_ID = 1
-    SECTOR_ID = 1    
+    try:
+        app.config.from_envvar('INDUSTRIAL_CONFIG')
+        log.info("Configurations set")
+    except:
+        log.error("INDUSTRIAL_CONFIG environment variable not set")
+        raise Exception("INDUSTRIAL_CONFIG environment variable not set") 
 
-    sim = Simulation(SECTOR_ID)
+    sim = Simulation(app.config['SECTOR_ID'])
 
     # @app.before_request
     # def simulation_status():
@@ -44,8 +48,8 @@ def create_app():
     @app.route('/position', methods=['GET'])
     def get_position():
         return jsonify({
-            "area_id": AREA_ID,
-            "sector_id": SECTOR_ID
+            "area_id": app.config['AREA_ID'],
+            "sector_id": app.config['SECTOR_ID']
         })
 
 
