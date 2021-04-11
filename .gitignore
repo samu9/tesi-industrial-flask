@@ -8,5 +8,5 @@ dist
 *.log
 errlog
 reqlog
-industrial/static/*
+industrial/static/uploads/*
 *.ini
