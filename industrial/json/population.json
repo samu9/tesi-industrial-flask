@@ -30,5 +30,11 @@
         {"name": "M3B.Z", "sector": "S3B", "m_type": "", "description": ""},
         {"name": "M1A.Z", "sector": "S1A", "m_type": "", "description": ""}
 
+    ],
+    "users": [
+        {"name": "samuele", "role": "Software Engineer", "img_url": null, "phone": null},
+        {"name": "John Doe", "role": "Engineer", "img_url": null, "phone": "111-3437568"},
+        {"name": "Marie Ann", "role": "Technician", "img_url": null, "phone": "222-4696431"}
     ]
+    
 }
