@@ -59,8 +59,8 @@ def create_app():
         return send_from_directory(app.config['USER_IMG_DIR'], id + '.jpg')
 
 
-    @authenticated
     @app.route('/position', methods=['GET'])
+    @authenticated
     def get_position():
         return jsonify({
             "area_id": app.config['AREA_ID'],
@@ -68,8 +68,8 @@ def create_app():
         })
 
 
-    @authenticated
     @app.route('/area')
+    @authenticated
     def get_areas():
         areas = Area.query.all()
         result = []
@@ -81,8 +81,8 @@ def create_app():
         return jsonify(result)
     
     
-    @authenticated
     @app.route('/area/<id>')
+    @authenticated
     def get_area_data(id):
         area = Area.query.filter(Area.id == id).first()
         result = {
@@ -93,9 +93,9 @@ def create_app():
         return jsonify(result)
 
 
-    @authenticated
     @app.route('/area/<area_id>/sectors')
     @app.route('/sector')
+    @authenticated
     def get_sectors(area_id=None):
         query = Sector.query
         sectors = query.all() if area_id is None \
@@ -108,8 +108,8 @@ def create_app():
             })
         return jsonify(result)
 
-    @authenticated
     @app.route('/sector/<id>')
+    @authenticated
     def get_sector_data(id):
         sector = Sector.query.filter(Sector.id == id).first()
         result = {
@@ -120,9 +120,9 @@ def create_app():
         return jsonify(result)
 
 
-    @authenticated
     @app.route('/sector/<sector_id>/machines')
     @app.route('/machine')
+    @authenticated
     def get_machines(sector_id=None):
         query = Machine.query
 
@@ -142,15 +142,15 @@ def create_app():
         return jsonify(result)
 
 
-    @authenticated
     @app.route("/machine/<id>/danger", methods=['POST'])
+    @authenticated
     def set_in_danger(id):
         sim.set_danger_mode(id)
         return jsonify(api_response("Danger set"))
 
 
-    @authenticated
     @app.route("/machine/<id>/danger/instruction", methods=['GET'])
+    @authenticated
     def get_danger_instructions(id):
         message, user_id = sim.get_danger_instruction_message(id)
 
@@ -172,15 +172,15 @@ def create_app():
         return jsonify(result)
 
 
-    @authenticated
     @app.route("/machine/<id>/resolve", methods=['GET'])
+    @authenticated
     def resolve_danger(id):
         sim.resolve_danger_mode(id)
         return jsonify(api_response("Danger resolved"))
 
 
-    @authenticated
     @app.route("/machine/<id>/data", methods=['GET'])
+    @authenticated
     def get_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id)\
             .order_by(MachineData.timestamp.desc()).limit(10).all()
@@ -197,8 +197,8 @@ def create_app():
         return jsonify(result)
 
 
-    @authenticated
     @app.route("/machine/<id>/data/update", methods=['GET'])
+    @authenticated
     def get_update_data(id):
         values = sim.generate(id)
         return jsonify({
@@ -208,8 +208,8 @@ def create_app():
         })
 
 
-    @authenticated
     @app.route("/machine/<id>/data/last", methods=['GET'])
+    @authenticated
     def get_last_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).first()
         if not data:
@@ -221,8 +221,8 @@ def create_app():
         })
 
 
-    @authenticated
     @app.route("/machine/<id>/log", methods=['GET'])
+    @authenticated
     def get_machine_logs(id):
         logs = MachineLog.query.filter(MachineLog.machine_id == id).order_by(MachineLog.timestamp.desc()).all()
 
@@ -237,8 +237,8 @@ def create_app():
         return jsonify(result)
 
 
-    @authenticated
     @app.route("/machine/<id>/command/<command>", methods=['POST'])
+    @authenticated
     def command_machine(id, command):
         machine = Machine.query.get(id)
 
@@ -262,8 +262,8 @@ def create_app():
         return jsonify(api_response("Command sent"))
 
 
-    @authenticated
     @app.route("/machine/<id>/start", methods=["POST"])
+    @authenticated
     def start_machine(id):
         machine = Machine.query.filter(Machine.id==id).first()
 
@@ -278,8 +278,8 @@ def create_app():
         return jsonify(True)
 
 
-    @authenticated
     @app.route("/machine/<id>/stop", methods=["POST"])
+    @authenticated
     def stop_machine(id):
         machine = Machine.query.filter(Machine.id==id).first()
 
@@ -298,8 +298,8 @@ def create_app():
         return jsonify(images_list)
 
 
-    @authenticated
     @app.route("/machine/<id>/image", methods=['POST'])
+    @authenticated
     def post_image(id):
         image_uuid = str(uuid.uuid4())
         filename = image_uuid + "." + app.config['IMAGE_FORMAT']
@@ -320,8 +320,8 @@ def create_app():
         return jsonify(api_response("Upload successful"))
 
 
-    @authenticated
     @app.route("/machine/image/<image_id>", methods=['GET'])
+    @authenticated
     def serve_machine_img(image_id):
         print("ok")
         return send_from_directory(app.config['USER_IMG_DIR'] + "/uploads", image_id + '.jpg')
