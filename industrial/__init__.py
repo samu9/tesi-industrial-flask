@@ -4,6 +4,7 @@ import datetime
 import logging
 import uuid
 import base64
+from functools import wraps
 
 from flask import Flask, jsonify, send_from_directory, request
 from werkzeug.utils import secure_filename
@@ -36,15 +37,17 @@ def create_app():
             "result": result
         }
 
-
-    @app.before_request
-    def check_auth():
-        auth = request.headers.get("Authorization")
-        if auth != "Basic " + app.config['API_KEY']:
-            log.error("Unauthorized")
-            log.error(auth)
-            return jsonify(api_response("Unauthorized", result=False)), 401
-
+    def authenticated(f):
+        @wraps(f)
+        def decorated_function(**kwargs):
+            auth = request.headers.get("Authorization")
+            if auth != "Basic " + app.config['API_KEY']:
+                log.error("Unauthorized")
+                log.error(auth)
+                return jsonify(api_response("Unauthorized", result=False)), 401
+            return f(**kwargs)
+        return decorated_function
+        
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -56,6 +59,7 @@ def create_app():
         return send_from_directory(app.config['USER_IMG_DIR'], id + '.jpg')
 
 
+    @authenticated
     @app.route('/position', methods=['GET'])
     def get_position():
         return jsonify({
@@ -64,6 +68,7 @@ def create_app():
         })
 
 
+    @authenticated
     @app.route('/area')
     def get_areas():
         areas = Area.query.all()
@@ -75,7 +80,8 @@ def create_app():
             })
         return jsonify(result)
     
-
+    
+    @authenticated
     @app.route('/area/<id>')
     def get_area_data(id):
         area = Area.query.filter(Area.id == id).first()
@@ -87,6 +93,7 @@ def create_app():
         return jsonify(result)
 
 
+    @authenticated
     @app.route('/area/<area_id>/sectors')
     @app.route('/sector')
     def get_sectors(area_id=None):
@@ -101,7 +108,7 @@ def create_app():
             })
         return jsonify(result)
 
-
+    @authenticated
     @app.route('/sector/<id>')
     def get_sector_data(id):
         sector = Sector.query.filter(Sector.id == id).first()
@@ -113,6 +120,7 @@ def create_app():
         return jsonify(result)
 
 
+    @authenticated
     @app.route('/sector/<sector_id>/machines')
     @app.route('/machine')
     def get_machines(sector_id=None):
@@ -134,12 +142,14 @@ def create_app():
         return jsonify(result)
 
 
+    @authenticated
     @app.route("/machine/<id>/danger", methods=['POST'])
     def set_in_danger(id):
         sim.set_danger_mode(id)
         return jsonify(api_response("Danger set"))
 
 
+    @authenticated
     @app.route("/machine/<id>/danger/instruction", methods=['GET'])
     def get_danger_instructions(id):
         message, user_id = sim.get_danger_instruction_message(id)
@@ -162,12 +172,14 @@ def create_app():
         return jsonify(result)
 
 
+    @authenticated
     @app.route("/machine/<id>/resolve", methods=['GET'])
     def resolve_danger(id):
         sim.resolve_danger_mode(id)
         return jsonify(api_response("Danger resolved"))
 
 
+    @authenticated
     @app.route("/machine/<id>/data", methods=['GET'])
     def get_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id)\
@@ -185,6 +197,7 @@ def create_app():
         return jsonify(result)
 
 
+    @authenticated
     @app.route("/machine/<id>/data/update", methods=['GET'])
     def get_update_data(id):
         values = sim.generate(id)
@@ -195,6 +208,7 @@ def create_app():
         })
 
 
+    @authenticated
     @app.route("/machine/<id>/data/last", methods=['GET'])
     def get_last_machine_data(id):
         data = MachineData.query.filter(MachineData.machine_id==id).order_by(MachineData.timestamp.desc()).first()
@@ -207,6 +221,7 @@ def create_app():
         })
 
 
+    @authenticated
     @app.route("/machine/<id>/log", methods=['GET'])
     def get_machine_logs(id):
         logs = MachineLog.query.filter(MachineLog.machine_id == id).order_by(MachineLog.timestamp.desc()).all()
@@ -221,6 +236,8 @@ def create_app():
             })
         return jsonify(result)
 
+
+    @authenticated
     @app.route("/machine/<id>/command/<command>", methods=['POST'])
     def command_machine(id, command):
         machine = Machine.query.get(id)
@@ -245,6 +262,7 @@ def create_app():
         return jsonify(api_response("Command sent"))
 
 
+    @authenticated
     @app.route("/machine/<id>/start", methods=["POST"])
     def start_machine(id):
         machine = Machine.query.filter(Machine.id==id).first()
@@ -260,6 +278,7 @@ def create_app():
         return jsonify(True)
 
 
+    @authenticated
     @app.route("/machine/<id>/stop", methods=["POST"])
     def stop_machine(id):
         machine = Machine.query.filter(Machine.id==id).first()
@@ -279,6 +298,7 @@ def create_app():
         return jsonify(images_list)
 
 
+    @authenticated
     @app.route("/machine/<id>/image", methods=['POST'])
     def post_image(id):
         image_uuid = str(uuid.uuid4())
@@ -300,6 +320,7 @@ def create_app():
         return jsonify(api_response("Upload successful"))
 
 
+    @authenticated
     @app.route("/machine/image/<image_id>", methods=['GET'])
     def serve_machine_img(image_id):
         print("ok")
